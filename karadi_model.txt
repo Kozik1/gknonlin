@@ -9,7 +9,7 @@ exogenous e_rn "Monetary policy shock" e_a "TFP shock" e_epsilon "Capital Qualit
 
 parameters theta beta alpha zeta chi etai vphi rhoa rhoi
 kappa_mc gamma gammap veps h PIss PHIss EFPss DELTAss IKss LAMBDAss 
-PSIss upsilon Dss sig_e_rn sig_e_a  sig_e_n sig_e_epsilon b res_spr 
+PSIss upsilon Dss sig_e_rn sig_e_a  sig_e_n sig_e_epsilon res_spr 
  
 % Markov - Swiching parameter initialization
 parameters(coef,2) kappa_pi rhoeps
@@ -66,7 +66,7 @@ nn = q*k*epsilon;
 % ?
 RKss*Kss*(rk+q(-1)+k(-1))=alpha*PMss*Yss*(pm+ym)+Kss*(q+epsilon+k(-1))-DELTAss*Kss*(delta+epsilon+k(-1));
 % 15. Production function where epsilon is cap quality
-ym = a(u*epsilon*k(-1))^alpha*l^(1-alpha);
+ym = a*u*epsilon*k(-1)^alpha*l^(1-alpha);
 % 17. Depreciation rate
 DELTAss/(DELTAss-deltac)*delta = (1+zeta)*u;    
 % 18. Optimal capacity utilization rate
@@ -93,12 +93,12 @@ y=ym*d;
 % eqb 24. Price dispersion
 Dss*d=gamma*Dss*PIss^(veps*(1-gammap))*(-gammap*veps*pi(-1)+veps*pi+d(-1))+veps/(1-gamma)*((1-gamma*PIss^((gamma-1)*(1-gammap)))/(1-gamma))^(-veps/(1-gamma))*gamma*PIss^((gamma-1)*(1-gammap))*((gamma-1)*pi+gammap*(1-gamma)*pi(-1));
 % eqb 26. Optimal price choice (f1 is like z in appendix)
-Fss*f = Yss*PMss*(y+pm) + beta*gamma*LAMBDAss*Fss*lambda(1)pi^(-gammap*veps)*f(1);
-FIss*f1 = Yss*y + beta*gamma*LAMBDAss*lambda*FIss*lambda(1)*pi^(gammap*(1-veps))*pi(1)^(veps-1)*f1(1);
+Fss*f = Yss*PMss*(y+pm) + beta*gamma*LAMBDAss*Fss*lambda(1)*pi^(-gammap*veps)*f(1);
+FIss*f1 = Yss*y + beta*gamma*LAMBDAss*FIss*lambda(1)*pi^(gammap*(1-veps))*pi(1)^(veps-1)*f1(1);
 % eqb 28. Optimal price choice
 pistar = (veps/(veps-1))*f/f1*pi;                
 %  eqb 29. Price index
-pi = (gamma*gammap*pi(-1)^(1-veps) + ((1-gamma)*pistar^(1-veps))^(1/(1-veps));
+pi = gamma*gammap*pi(-1)^(1-veps) + ((1-gamma)*pistar^(1-veps))^(1/(1-veps));
 % eqb 30. Fisher equation
 rn = r*pi(1);
 % 31. Nominal interest rate rule
@@ -116,14 +116,11 @@ PSIss*psi = -upsilon*EFPss*efp;
 % 10. Aggregate capital
 q*k = phic*n;
 % on top of page 23: 
-% phiс is the leverage ratio for total intermediated funds; phi is the 
-% privately intermediated funds leverage ratio.  
-
-phiс=(1/(1-psi)*phi
+phic=(1/(1-psi))*phi;
 
 % The central bank injects credit in response to movements 
 % in credit spreads,according to the followingfeedbackrule:
-psi=PSIss+res_spr*(efp(1)-efp)
+%psi=PSIss+res_spr*(efp(1)-efp);
 % Measurement equations
 	%----------------------
 
