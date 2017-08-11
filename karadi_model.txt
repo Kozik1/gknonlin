@@ -1,0 +1,132 @@
+% non-linear model Gertler & Karadi (2011)
+
+endogenous nu rk r uc eta x z phi n ne nn q k delta u l y i c pmn pi
+rn epsilon a pm efp lambda erk psi phic f f1 pistar ym mc d in YHAT PAIHAT RHAT
+
+observables YHAT PAIHAT RHAT
+
+exogenous e_rn "Monetary policy shock" e_a "TFP shock" e_epsilon "Capital Quality shock" e_n "Government consumption shock"
+
+parameters theta beta alpha zeta chi etai vphi rhoa rhoi
+kappa_mc gamma gammap veps h PIss PHIss EFPss DELTAss IKss LAMBDAss 
+PSIss upsilon Dss sig_e_rn sig_e_a  sig_e_n sig_e_epsilon b res_spr 
+ 
+% Markov - Swiching parameter initialization
+parameters(coef,2) kappa_pi rhoeps
+
+parameters coef_tp_1_2, coef_tp_2_1
+
+
+model
+    # PMss = (veps-1)/veps;
+    # Rss=1/beta;
+    # omega=(1-theta*(EFPss*PHIss+Rss))*1/PHIss;
+    # Zss = EFPss*PHIss + Rss;
+    # Xss=Zss;
+    # NUss = (1-theta)*beta*EFPss/(1-beta*theta*Xss);
+    # ETAss = (1-theta)*beta*Rss/(1-beta*theta*Zss);
+    # RKss = Rss + EFPss;
+    # YKss = (RKss - (1-DELTAss))/alpha/PMss;
+    # IYss=IKss/YKss;
+    # KLss = YKss^(1/(alpha-1));
+    # Lss = (((1-alpha)*(1-beta*h)*PMss)/((1-h)*chi*(0.8-IYss)))^(1/(1+vphi));
+    # Kss = KLss*Lss;
+    # b = alpha*YKss;
+    # Yss=Kss^alpha*Lss^(1-alpha);
+    # Gss = 0.2*Yss;
+    # Iss = IYss*Yss; 
+    # RNss=log(Rss);  
+    # PMNss = PMss;
+    # deltac = DELTAss - b/(1+zeta); 
+    # divert = ETAss/PHIss + NUss;
+    # Nss = Kss/PHIss;
+    # NEss = theta*Zss*Nss;
+    # NNss = omega*Kss;
+    # Css = Yss-Iss-Gss;
+    # Fss = Yss*PMNss/(1-beta*gamma);
+    # FISS = Yss/(1-beta*gamma*PIss^(gammap-1));
+    # UCss=(1-beta*h)/((1-h)*Css); 
+    # FIss = Yss/(1-beta*gamma);
+% 11.1 (passport) Value of banks' capital (marginal gain - interpret of nu)
+NUss*nu = (1-theta)*beta*(RKss*rk(1)-Rss*r) + (1-theta)*beta*(RKss-Rss)*lambda(1) + beta*theta*Xss*NUss*(lambda(1)+x(1)+nu(1));
+% 11.2 (passport) Value of banks' net wealth
+ETAss*eta = (1-theta)*beta*LAMBDAss*Rss*(lambda(+1)+r)+beta*theta*Zss*ETAss*(lambda(1)+z(1)+eta(1));    
+% 7. Optimal leverage (phi) rearranged
+divert*PHIss*phi-PHIss*NUss*(phi+nu)=ETAss*eta;
+% 8 Growth rate of banks' capital
+Zss*z = PHIss*(RKss*rk-Rss*r(-1)) + PHIss*(RKss-Rss)*phi(-1) + Rss*r(-1);
+% 9 growth rate of banks' net worth
+x = phi/phi(-1)* z;
+% 11 Bank's net worth plus shock
+n = NEss/Nss*ne + NNss/Nss*nn - sig_e_n*e_n;
+% 12. Existing banks' net worth accumulation
+ne = z*n(-1);
+% 13. New banks' net worth
+nn = q*k*epsilon;  
+% ?
+RKss*Kss*(rk+q(-1)+k(-1))=alpha*PMss*Yss*(pm+ym)+Kss*(q+epsilon+k(-1))-DELTAss*Kss*(delta+epsilon+k(-1));
+% 15. Production function where epsilon is cap quality
+ym = a(u*epsilon*k(-1))^alpha*l^(1-alpha);
+% 17. Depreciation rate
+DELTAss/(DELTAss-deltac)*delta = (1+zeta)*u;    
+% 18. Optimal capacity utilization rate
+alpha*pm*ym/u = b*u^zeta *epsilon*k(-1);
+% 19. Net investment
+in = Iss*i - DELTAss*Kss*(k(-1)+epsilon+delta);
+q = etai*(in-in(-1))/Iss - beta*etai*(in(1)-in)/Iss;
+% 20. Capital accumulation equation
+Kss*k = Kss*k(-1) + Kss*epsilon + in;
+% 1. Marginal utility of consumption
+uc = -1/((1-beta*h)*(1-h))*(c-h*c(-1)-beta*h*(c(1)-h*c));
+% 3. Stochastic discount factor
+lambda = uc/uc(-1);
+% 2. Euler equation
+beta*lambda(1)*r = 1;
+% Equilibrium resource constraint 22
+Yss*y = Css*c + Iss*i;
+(1-alpha)*pm*ym/l = chi*l^vphi/uc;
+pm = pmn/pi;  
+% eqb 25. Markup
+mc=-pm; 
+% eqbrium 23. Wholesale, retail output
+y=ym*d;
+% eqb 24. Price dispersion
+Dss*d=gamma*Dss*PIss^(veps*(1-gammap))*(-gammap*veps*pi(-1)+veps*pi+d(-1))+veps/(1-gamma)*((1-gamma*PIss^((gamma-1)*(1-gammap)))/(1-gamma))^(-veps/(1-gamma))*gamma*PIss^((gamma-1)*(1-gammap))*((gamma-1)*pi+gammap*(1-gamma)*pi(-1));
+% eqb 26. Optimal price choice (f1 is like z in appendix)
+Fss*f = Yss*PMss*(y+pm) + beta*gamma*LAMBDAss*Fss*lambda(1)pi^(-gammap*veps)*f(1);
+FIss*f1 = Yss*y + beta*gamma*LAMBDAss*lambda*FIss*lambda(1)*pi^(gammap*(1-veps))*pi(1)^(veps-1)*f1(1);
+% eqb 28. Optimal price choice
+pistar = (veps/(veps-1))*f/f1*pi;                
+%  eqb 29. Price index
+pi = (gamma*gammap*pi(-1)^(1-veps) + ((1-gamma)*pistar^(1-veps))^(1/(1-veps));
+% eqb 30. Fisher equation
+rn = r*pi(1);
+% 31. Nominal interest rate rule
+rn = rhoi*rn(-1) + (1-rhoi)*(kappa_pi*pi+kappa_mc*mc) + sig_e_rn*e_rn;
+% Stochastic spread
+efp = rk(1)/r;
+% Technical shock
+a = rhoa*a(-1) - sig_e_a*e_a;
+% Cap quality shock
+epsilon = rhoeps*epsilon(-1) - sig_e_epsilon*e_epsilon;
+% Expected stochastic return
+erk = rk(+1);
+% Steady state fraction of privately intermediated assets
+PSIss*psi = -upsilon*EFPss*efp;
+% 10. Aggregate capital
+q*k = phic*n;
+% on top of page 23: 
+% phiс is the leverage ratio for total intermediated funds; phi is the 
+% privately intermediated funds leverage ratio.  
+
+phiс=(1/(1-psi)*phi
+
+% The central bank injects credit in response to movements 
+% in credit spreads,according to the followingfeedbackrule:
+psi=PSIss+res_spr*(efp(1)-efp)
+% Measurement equations
+	%----------------------
+
+		YHAT=y;
+        PAIHAT=pi; 
+        RHAT=r;  
